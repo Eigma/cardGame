@@ -1476,6 +1476,7 @@ MonoBehaviour:
   gameArea: {fileID: 1706927549}
   scoreText: {fileID: 1776264661}
   comboText: {fileID: 288993449}
+  resetButton: {fileID: 634402802}
   spacing: 8
   letters:
   - A
