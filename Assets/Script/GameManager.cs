@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,76 +9,98 @@ public class GameManager : MonoBehaviour
     [Header("References")]
     public GameObject cardPrefab;
     public Transform gameArea;
-    public TextMeshProUGUI scoreText;
-    public TextMeshProUGUI comboText;
+    public TextMeshProUGUI scoreText, comboText;
     public Button resetButton;
 
     [Header("Layout")]
-    public int rows = 2;
-    public int cols = 3;
     public float spacing = 8f;
 
     [Header("Letters")]
-    public List<string> letters; 
+    public List<string> letters;
 
-    [HideInInspector] public bool IsBusy = false;
+    [Header("Level Progression")]
+    public int startSize = 2;
+    public int maxSize = 6;
 
+    [Header("Level Display")]
+    public GameObject levelPanel;                
+    public TextMeshProUGUI levelPanelText;         
+    public float levelDisplayDuration = 1f;        
+
+    public bool IsBusy { get; private set; } = false;
+    int score, combo;
+    int currentSize;
     Card firstRevealed, secondRevealed;
-    int score = 0, combo = 0;
+
+    int rows { get; set; }
+    int cols { get; set; }
 
     void Start()
     {
-        resetButton.onClick.AddListener(Setup);
+        resetButton.gameObject.SetActive(false);
+        currentSize = startSize;
+        StartCoroutine(BeginLevelRoutine());
+    }
+
+    IEnumerator BeginLevelRoutine()
+    {
+        // Show next level panel
+        levelPanelText.text = $"Level {currentSize} ({currentSize}×{currentSize})";
+        levelPanel.SetActive(true);
+        yield return new WaitForSeconds(levelDisplayDuration);
+        levelPanel.SetActive(false);
+
+        // Reset score/combo and update UI
+        score = combo = 0;
+        UpdateUI();
+
+        // Set grid dimensions and deal
+        rows = cols = currentSize;
         Setup();
     }
 
     public void Setup()
     {
         StopAllCoroutines();
-        // clear old cards
         foreach (Transform t in gameArea)
             Destroy(t.gameObject);
-
-        score = combo = 0;
-        UpdateUI();
         StartCoroutine(DealCards());
     }
 
     IEnumerator DealCards()
     {
-        int total = rows * cols;
-        
-        List<string> pool = new List<string>();
-        foreach (var L in letters) pool.Add(L);
-        pool.AddRange(letters);  
+        int totalCards = rows * cols;
+        int pairCount = totalCards / 2;
+        var selected = letters.GetRange(0, pairCount);
 
-        
+        var pool = new List<string>(selected);
+        pool.AddRange(selected);
         for (int i = 0; i < pool.Count; i++)
         {
             int r = Random.Range(i, pool.Count);
-            var tmp = pool[i];
-            pool[i] = pool[r];
-            pool[r] = tmp;
+            (pool[i], pool[r]) = (pool[r], pool[i]);
         }
 
-        
         var grid = gameArea.GetComponent<GridLayoutGroup>();
+        grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
         grid.constraintCount = cols;
         grid.spacing = new Vector2(spacing, spacing);
 
-        
-        for (int i = 0; i < pool.Count; i++)
+        var rt = gameArea.GetComponent<RectTransform>();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+        float totalW = rt.rect.width - (cols - 1) * spacing;
+        float totalH = rt.rect.height - (rows - 1) * spacing;
+        grid.cellSize = new Vector2(totalW / cols, totalH / rows);
+
+        foreach (var letter in pool)
         {
             var go = Instantiate(cardPrefab, gameArea);
             var card = go.GetComponent<Card>();
-            card.letter = pool[i];
-            var btn = go.GetComponent<Button>();
-            btn.onClick.AddListener(card.OnClick);
-            yield return new WaitForSeconds(0.02f);
+            card.letter = letter;
+            go.GetComponent<Button>().onClick.AddListener(card.OnClick);
         }
 
-        
-        SaveLoadManager.Instance.LoadProgress(this);
+        yield return null;
     }
 
     public void CardRevealed(Card card)
@@ -115,15 +137,32 @@ public class GameManager : MonoBehaviour
         IsBusy = false;
         UpdateUI();
 
-        SaveLoadManager.Instance.SaveProgress(this);
+        bool allMatched = true;
+        foreach (Transform t in gameArea)
+        {
+            Card card = t.GetComponent<Card>();
+            if (card != null && !card.IsMatched)  // You need a public IsMatched property
+            {
+                allMatched = false;
+                break;
+            }
+        }
 
-        if (gameArea.childCount == 0)
-            Debug.Log("Game Over! Final Score: " + score);
+        if (allMatched)
+        {
+            currentSize++;
+            if (currentSize > maxSize)
+            {
+                Debug.Log("All levels complete! Restarting at " + startSize + "×" + startSize);
+                currentSize = startSize;
+            }
+            StartCoroutine(BeginLevelRoutine());
+        }
     }
 
     void UpdateUI()
     {
-        scoreText.text = "Score: " + score;
-        comboText.text = "Combo: " + combo;
+        scoreText.text = $"Lvl {currentSize}  Score: {score}";
+        comboText.text = $"Combo: {combo}";
     }
 }

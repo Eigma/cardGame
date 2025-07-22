@@ -12,6 +12,7 @@ public class Card : MonoBehaviour
 
     bool isFlipped = false;
     bool isMatched = false;
+    public bool IsMatched => isMatched;
     GameManager gm;
 
     void Awake()
