@@ -147,6 +147,7 @@ GameObject:
   - component: {fileID: 595730090530214448}
   - component: {fileID: 595730090530214449}
   - component: {fileID: 595730090530214454}
+  - component: {fileID: 7951694368902548267}
   m_Layer: 5
   m_Name: Card
   m_TagString: Untagged
@@ -226,13 +227,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 0
     m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 0
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
@@ -257,3 +258,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &7951694368902548267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 595730090530214452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10f8047b1389ba64cb93a446693d3cf9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  letter: 
+  backCharacter: '?'
+  textComponent: {fileID: 595730089608743059}
+  flipDuration: 0.25
