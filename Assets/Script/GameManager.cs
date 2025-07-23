@@ -44,17 +44,17 @@ public class GameManager : MonoBehaviour
 
     IEnumerator BeginLevelRoutine()
     {
-        // Show next level panel
+        
         levelPanelText.text = $"Level {currentSize} ({currentSize}×{currentSize})";
         levelPanel.SetActive(true);
         yield return new WaitForSeconds(levelDisplayDuration);
         levelPanel.SetActive(false);
 
-        // Reset score/combo and update UI
+        
         score = combo = 0;
         UpdateUI();
 
-        // Set grid dimensions and deal
+        
         rows = cols = currentSize;
         Setup();
     }
@@ -141,7 +141,7 @@ public class GameManager : MonoBehaviour
         foreach (Transform t in gameArea)
         {
             Card card = t.GetComponent<Card>();
-            if (card != null && !card.IsMatched)  // You need a public IsMatched property
+            if (card != null && !card.IsMatched)  
             {
                 allMatched = false;
                 break;
